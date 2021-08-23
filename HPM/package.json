@@ -1,0 +1,28 @@
+{
+	"packageName": "WakeOnLan",
+	"minimumHEVersion": "2.1.9",
+	"author": "Ramdev Shallem",
+	"version": "1.0.1",
+	"dateReleased": "2023-08-23",
+	"licenseFile": "",
+	"releaseNotes": "",
+	"apps" : [
+		{
+			"id" : "67d9ff1-a5cb-453c-8ffa-e78c5aff78b",
+			"name": "WakeOnLanApp",
+			"namespace": "ramdev",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/WakeOnLanApp.groovy",
+			"required": true,
+			"oauth": false
+		}
+	],
+	"drivers" : [
+		{
+			"id": "225ffff9-98db-49dfb8b9-c2ffaaeaaf2",
+			"name": "WakeOnLanApp Device Driver",
+			"namespace": "ramdev",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/WakeOnLanDriver.groovy",
+			"required": true
+		}
+	]
+}
