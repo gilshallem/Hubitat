@@ -1,0 +1,20 @@
+{
+	"author": "Ramdev Shallem",
+	"gitHubUrl": "https://github.com/gilshallem",
+	"payPalUrl": "https://www.paypal.com/donate?hosted_button_id=EFWUBPCFWUFY6",
+	"packages": [
+		{
+			"name": "WakeOnLan",
+			"category": "Control",
+			"tags": [
+				"Multimedia",
+				"Misc. Devices",
+				"LAN",
+				"Tools & Utilities"
+			  ],
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/HPM/package.json",
+			"description": "Wake On Lan  allows you to wake/boot your PC's up from the hub using any automation app you want. It uses its own implication of WakeOnLan so it will probably work even when other solutions fail"
+		}
+	]
+	
+}
