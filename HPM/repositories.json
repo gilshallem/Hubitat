@@ -12,7 +12,7 @@
 				"LAN",
 				"Tools & Utilities"
 			  ],
-			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/HPM/package.json",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/HPM/wol_package.json",
 			"description": "Wake On Lan  allows you to wake/boot your PC's up from the hub using any automation app you want. It uses its own implication of WakeOnLan so it will probably work even when other solutions fail"
 		}
 	]

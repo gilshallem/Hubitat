@@ -11,7 +11,7 @@
 			"id" : "67d9ff1-a5cb-453c-8ffa-e78c5aff78b",
 			"name": "WakeOnLanApp",
 			"namespace": "ramdev",
-			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/WakeOnLanApp.groovy",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/WakeOnLan/WakeOnLanApp.groovy",
 			"required": true,
 			"oauth": false
 		}
@@ -21,7 +21,7 @@
 			"id": "225ffff9-98db-49dfb8b9-c2ffaaeaaf2",
 			"name": "WakeOnLanApp Device Driver",
 			"namespace": "ramdev",
-			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat-WakeOnLan/main/WakeOnLanDriver.groovy",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/WakeOnLan/WakeOnLanDriver.groovy",
 			"required": true
 		}
 	]
