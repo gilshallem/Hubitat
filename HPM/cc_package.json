@@ -1,0 +1,28 @@
+{
+	"packageName": "Computer Controller",
+	"minimumHEVersion": "2.1.9",
+	"author": "Ramdev Shallem",
+	"version": "1.0.1",
+	"dateReleased": "2023-08-28",
+	"licenseFile": "",
+	"releaseNotes": "",
+	"apps" : [
+		{
+			"id" : "B7A2DDA2-4295-4A76-842D-0F511DF42BF3",
+			"name": "Computer Controller App",
+			"namespace": "ramdev",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/ComputerController/ComputerControllerApp.groovy",
+			"required": true,
+			"oauth": false
+		}
+	],
+	"drivers" : [
+		{
+			"id": "86FF33D6-FE42-424E-AB6F-6077050AE2AC",
+			"name": "Computer Controller Driver",
+			"namespace": "ramdev",
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/ComputerController/ComputerControllerDriver.groovy",
+			"required": true
+		}
+	]
+}

@@ -14,6 +14,18 @@
 			  ],
 			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/HPM/wol_package.json",
 			"description": "Wake On Lan  allows you to wake/boot your PC's up from the hub using any automation app you want. It uses its own implication of WakeOnLan so it will probably work even when other solutions fail"
+		},
+		{
+			"name": "Computer Controller",
+			"category": "Control",
+			"tags": [
+				"Multimedia",
+				"Misc. Devices",
+				"LAN",
+				"Tools & Utilities"
+			  ],
+			"location": "https://raw.githubusercontent.com/gilshallem/Hubitat/main/HPM/cc_package.json",
+			"description": "Send Commands to your windows pc and get events from the pc. Uses a windows software called EventGhost"
 		}
 	]
 	
