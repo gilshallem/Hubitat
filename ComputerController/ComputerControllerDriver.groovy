@@ -41,7 +41,7 @@ metadata {
         input(name:"mySecureOn", type: "text", required: false, title: "[Wake On Lan] SecureOn",description:"Certain NICs support a security feature called \"SecureOn\". It allows users to store within the NIC a hexadecimal password of 6 bytes. Example: \"EF4F34A2C43F\"")
         input(name:"myWOLPort", type: "number", required: false, title: "[Wake On Lan] Port",description:"Default: 7",defaultValue :"7")
         
-        input(name:"myWakeupTime", type: "number", required: false, title: "[Wake On Lan] Max wakeup time (secs)",description:"The maximum time in seconds it takes for the computer to wakeup (after that any event that was triggered while the pc was off will be forgotten)",defaultValue :90)
+        input(name:"myWakeupTime", type: "number", required: false, title: "[Wake On Lan] Max wakeup time (secs)",description:"The maximum time in seconds it takes for the computer to wakeup (after that any event that was triggered while the pc was off will be forgotten)",defaultValue :200)
         input(name:"myReconnectDelay", type: "number", required: false, title: "Reconnect Delay (secs)",description:"The interval between each reconnect attempt in seconds",defaultValue :1)
         
     }
