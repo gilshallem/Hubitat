@@ -1,7 +1,8 @@
-version = "1.0.0"
+version = "1.0.1"
 
 
 import eg
+from JumpIfElse2 import JumpIfElse2
 
 eg.RegisterPlugin(
     name = "Hubitat",
@@ -1396,6 +1397,7 @@ class WsBroadcastMessage(eg.ActionBase):
 
         if not self.pars:
             message = self.plugin.EvalString2(message, self)
+        p = eg.event.payload
         cond = self.plugin.EvalString(cond, self) if cond != "" else True
 
         if cond:
@@ -1417,6 +1419,7 @@ class WsBroadcastMessage(eg.ActionBase):
         self.period = period
         self.pars = pars
 
+        self.p = eg.event.payload
         self.eg_event = eg.event
         self.eg_result = eg.result
         message = replInstVal(message)
@@ -1427,7 +1430,10 @@ class WsBroadcastMessage(eg.ActionBase):
         else:
             if not pars:
                 message = self.plugin.EvalString2(message, self)
-            cond = self.plugin.EvalString(cond, self) if cond != "" else True
+            #cond = self.plugin.EvalString(cond, self) if cond != "" else True
+            p = eg.event.payload
+            cond = eval(cond) if cond != "" else True
+            #eg.PrintNotice("cond: " + str(cond))
             if cond:
                 self.plugin.BroadcastMessage( dumps([message,eg.event.payload]))
 
@@ -1451,7 +1457,10 @@ class WsBroadcastMessage(eg.ActionBase):
         # parsCtrl = wx.CheckBox(panel, -1, self.plugin.text.parsing)
         # parsCtrl.SetValue(pars)
         condLabel = wx.StaticText(panel, -1, self.plugin.text.cond)
+       
         condCtrl = wx.TextCtrl(panel, -1, cond)
+        condHelpLabel = wx.StaticText(panel, -1, self.plugin.text.cond_help)
+        condExampleLabel = wx.StaticText(panel, -1, self.plugin.text.cond_example)
         # messSizer = wx.StaticBoxSizer(
         #     wx.StaticBox(panel, -1, text.mess),
         #     wx.VERTICAL
@@ -1462,6 +1471,8 @@ class WsBroadcastMessage(eg.ActionBase):
         # mainSizer.Add(messSizer, 0, wx.EXPAND|wx.TOP, 15)
         mainSizer.Add(condLabel,0,wx.TOP,10)
         mainSizer.Add(condCtrl,0,wx.EXPAND|wx.TOP,2)
+        mainSizer.Add(condHelpLabel,0,wx.TOP,10)
+        mainSizer.Add(condExampleLabel,0,wx.TOP,10)
         # panel.sizer.Add(mainSizer, 0, wx.EXPAND|wx.TOP, 15)
 
 
@@ -1756,7 +1767,7 @@ class WsBroadcastData(eg.ActionBase):
         dataName = "Data name:"
         data2send = "Data for broadcast (python expression):"
         onlyChange = "Data send only if it has been changed"
-        cond = "Condition for data sending (python expression):"
+        cond = "Condition for data sending (python expression)"
         period = "Sending period [s]:"
  
 
@@ -4287,6 +4298,8 @@ class Hubitat(eg.PluginBase):
         abortAll = "Disconnect all"
         refresh = "Refresh"
         cond = "Condition for data sending (python expression):"
+        cond_help = "use p for the event payload (p[0],p[1]... for array of parameters)"
+        cond_example = "Example: float(p)>50.00  this will sent the command only if the event parameter value is greater then 50"
         setVar = (
             "Action to perform only if the variable does not exist yet",
             "Action to perform always"
@@ -4295,6 +4308,7 @@ class Hubitat(eg.PluginBase):
     def __init__(self):
         self.AddEvents()
         self.AddAction(WsBroadcastMessage,"Send Command","Send Command",'Broadcasts a command to all the connceted hubs')
+        self.AddAction(JumpIfElse2)
         #self.AddActionsFromList(ACTIONS)
 
 
@@ -4943,7 +4957,9 @@ class Hubitat(eg.PluginBase):
         staticBoxSizer = wx.StaticBoxSizer(staticBox, wx.VERTICAL)
         staticBoxSizer.Add(sizer, 0, wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, 5)
         panel.sizer.Add(staticBoxSizer, 0, wx.EXPAND)
-
+        
+        helpLabel = panel.StaticText("The plugin will listen for connections from Hubitat hubs on the stated port.\nYou may choose to give a username and password in order to make sure no one\nelse sends events to your EG except your hub - it is not mandatory.\nif you do add a user and password, you need to set them also in the hub\nso it will be able to connect to EG\n\nNOTE: due to a bug in EG you may need to make some changes to this form in order to click OK")
+        panel.sizer.Add(helpLabel, 0, wx.TOP,10)
         # sizer = wx.FlexGridSizer(3, 2, 5, 5)
         # sizer.Add(labels[3], 0, ACV)
         # sizer.Add(authRealmCtrl)
