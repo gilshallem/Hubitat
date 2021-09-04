@@ -75,9 +75,7 @@ def MainPage() {
 			def devCount = 0
             paragraph "Computers:"
 			getChildDevices().sort({ a, b -> a.label <=> b.label }).each{
-				
-					devCount = devCount + 1
-                   
+				devCount = devCount + 1
                 href (name: "configureDevicePage", title: "💻 ${it.label}",
 					  description: "Click to configure",
                        params: [deviceNetworkId: it.deviceNetworkId, deviceName: it.label],
@@ -87,6 +85,8 @@ def MainPage() {
             href (name: "configureDevicePage", title: "➕  Add Computer",
                   description: "Click to add a new Computer",
 					  page: "configureDevicePage")
+            paragraph "Help:"
+            href "", title: "📖 Learn How To Configure And Use", style: "external", url: "https://community.hubitat.com/t/78640", description: "Click to view the tutorial", required: false
             paragraph "Uninstall:"
 			href "pageRemove", title: "⛔ Uninstall The App", description: "Click to uninstall Computer Controller"
 		}
