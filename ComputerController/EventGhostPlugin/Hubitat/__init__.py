@@ -1,5 +1,5 @@
-version = "1.0.1"
-
+version = "1.0.2"
+version_num = 2
 
 import eg
 from JumpIfElse2 import JumpIfElse2
@@ -1089,7 +1089,9 @@ class MyHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.plugin.text.wsClientConn,
             payload = [self.clAddr]
         )
-
+        self.sendPluginVersion()
+    def sendPluginVersion(self):
+        self.write_message("[\"plugin_version\",\"" + version + "\"," + str(version_num) + "]")
 
     def version_string(self):
         """Return the server software version string."""

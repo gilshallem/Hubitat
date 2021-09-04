@@ -6,7 +6,7 @@
  * 
  * 
  */
-public static String version()      {  return "v1.03"  }
+public static String version()      {  return "v1.04"  }
 definition(
     name: "PC Controller (By Ramdev)",
     namespace: "ramdev",

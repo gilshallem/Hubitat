@@ -14,6 +14,8 @@ import groovy.transform.Field
 @Field static Map connected =[:]
 @Field static Map sentEventTime=[:]
 @Field static Map eventAfterConnect=[:]
+@Field static Map pluginVersion=[:]
+
 
 metadata {
     definition (name: "PC Controller Device", namespace: "ramdev", author: "Ramdev") {
@@ -27,6 +29,8 @@ metadata {
         command "AddNumberParam",[[name:"Value*", type: "NUMBER", description: "Enter value", required: true ]]
         command "ClearParams"
         attribute "Connected", "boolean"
+        attribute "EG Plugin Version", "string"
+        attribute "EG Plugin Outdated", "boolean"
         attribute "ReceivedCommand", "string"
         attribute "ReceivedParam1", "string"
         attribute "ReceivedParam2", "string"
@@ -123,12 +127,50 @@ def addParam(value) {
 def parse(String cmd) {
     log.debug "recived: $cmd"
     def json = parseJson(cmd);
-    sendEvent(name: "ReceivedCommand", value: json[0],isStateChange: true)
-  
-    setReceivedParams(json)
-   
-       
+    if (json[0] == "plugin_version") {
+        pluginVersion[device.id] = [json[1],json[2]]
+        findLatestVersion()
+    }
+    else {
+        sendEvent(name: "ReceivedCommand", value: json[0],isStateChange: true)
+        setReceivedParams(json)
+    }
+
+}
+def comparePluginVersion(newVer) {
+    def verNum = newVer[0]
     
+    if (pluginVersion[device.id]) {
+        def outdated = pluginVersion[device.id][1]<verNum   
+        if (outdated) {
+            sendEvent(name: "EG Plugin Version", value: pluginVersion[device.id][0] + " (outdated, please update to " + newVer[1] +")")
+            sendEvent(name: "EG Plugin Outdated", value:true)
+        }
+        else {
+            sendEvent(name: "EG Plugin Version", value: pluginVersion[device.id][0] + " (Latest version)")
+            sendEvent(name: "EG Plugin Outdated", value:false)
+        }
+         
+    } 
+    else {
+        sendEvent(name: "EG Plugin Version", value: "1.0.1 (outdated, please update to " + newVer[1] +")")
+        sendEvent(name: "EG Plugin Outdated", value:true)
+    }
+    
+}
+
+def checkIfReceivedPluginVersion() {
+    if (!pluginVersion[device.id]) {
+        findLatestVersion()
+    }
+}
+def onRecieveVersion(resp,deta) {
+    if (resp.status) {
+        comparePluginVersion(resp.getJson())
+    }
+}
+def findLatestVersion() {
+    asynchttpGet(onRecieveVersion,[uri:"https://raw.githubusercontent.com/gilshallem/Hubitat/main/ComputerController/EventGhostPlugin/version.json"]) 
 }
 
 def setReceivedParams(json) {
@@ -168,6 +210,7 @@ def httpcallback() {
 def SendEvent(eventName) {
     def params = state["sendParams"];
     if (!params) params=[]
+    log.debug "sending " + eventName
     interfaces.webSocket.sendMessage("{\"event\":\"" +eventName +"\",\"params\":"+ state["sendParams"] +"}" )
     ClearParams() 
 }
@@ -234,6 +277,7 @@ def webSocketStatus(String status){
 }
 
 def onConnected() {
+    runIn(5,"checkIfReceivedPluginVersion")
     if (eventAfterConnect[device.id]) {
         if (now() - sentEventTime[device.id] < (myWakeupTime?:90) *1000) {
             SendEvent(eventAfterConnect[device.id])
