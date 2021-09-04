@@ -1,5 +1,5 @@
 /*
- *	Computer Controller
+ *	PC Controller
  *
  *	Author: Ramdev Shallem
  * 
@@ -16,7 +16,7 @@ import groovy.transform.Field
 @Field static Map eventAfterConnect=[:]
 
 metadata {
-    definition (name: "Computer Controller", namespace: "ramdev", author: "Ramdev") {
+    definition (name: "PC Controller Device", namespace: "ramdev", author: "Ramdev") {
         capability "PushableButton"
         capability "Initialize"
         command "SendEvent" ,[[name:"Event Data*", type: "STRING", description: "Enter event data", required: true ]] 

@@ -1,14 +1,14 @@
 /*
- *	Computer Controller
+ *	PC Controller
  *
  *	Author: Ramdev Shallem
  * 
  * 
  * 
  */
-public static String version()      {  return "v1.02"  }
+public static String version()      {  return "v1.03"  }
 definition(
-    name: "Computer Controller (By Ramdev)",
+    name: "PC Controller (By Ramdev)",
     namespace: "ramdev",
     author: "Ramdev",
     description: "Connects your PC and the hubitat hub. requires EventGhost",
@@ -49,14 +49,14 @@ def initialize()
 	clearDeviceConfigSettings()
     state.editedId = null;
     state.deleted= false;
-	log.debug "ComputerControllerApp ${version()} - Initialized"
+	log.debug "PCControllerApp ${version()} - Initialized"
 }
 
 
 def MainPage() {
 	if (!state.AppIsInstalled) {
 		return dynamicPage(name: "MainPage", title: "", install:true, uninstall: true){
-			section("<h2>Computer Controller (by Ramdev)</h2>") {
+			section("<h2>PC Controller (by Ramdev)</h2>") {
 				paragraph ""
 				paragraph"This software is provided \"AS IS\", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement."
 				paragraph ""
@@ -71,7 +71,7 @@ def MainPage() {
 	return dynamicPage(name: "MainPage", install:true, uninstall: false){
         if (state.configuringDevice ) { configureDevice() }
         
-        section("<h2>Computer Controller ${version()} (by Ramdev)</h2>"){
+        section("<h2>PC Controller ${version()} (by Ramdev)</h2>"){
 			def devCount = 0
             paragraph "Computers:"
 			getChildDevices().sort({ a, b -> a.label <=> b.label }).each{
@@ -88,7 +88,7 @@ def MainPage() {
             paragraph "Help:"
             href "", title: "📖 Learn How To Configure And Use", style: "external", url: "https://community.hubitat.com/t/78640", description: "Click to view the tutorial", required: false
             paragraph "Uninstall:"
-			href "pageRemove", title: "⛔ Uninstall The App", description: "Click to uninstall Computer Controller"
+			href "pageRemove", title: "⛔ Uninstall The App", description: "Click to uninstall PC Controller"
 		}
         
        
@@ -135,7 +135,7 @@ def configureDevicePage(params) {
 def pageRemove(){
 	dynamicPage(name: "pageRemove", title: "", install: false, uninstall: true){
 		section('CAUTION'){
-			paragraph "You are about to completely remove Computer Controller and all of the computers.", required: true
+			paragraph "You are about to completely remove PC Controller and all of the computers.", required: true
 			paragraph "If you are sure you want to do this, please tap on the Remove button below, To cancel press Done.", required: true
 		}
 	}
@@ -162,7 +162,7 @@ def configureDevice() {
 		try {
 			def newDevice = addChildDevice(
 				"ramdev",
-				"Computer Controller",
+				"PC Controller Device",
 				"PC" + now(),
 				[
 					"label" : configureDeviceName,
