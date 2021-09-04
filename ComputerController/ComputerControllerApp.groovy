@@ -82,7 +82,7 @@ def MainPage() {
 					   page: "configureDevicePage")
 				
 			}
-            href (name: "configureDevicePage", title: "➕  Add Computer",
+            href (name: "configureDevicePage", title: "➕  Add a Computer",
                   description: "Click to add a new Computer",
 					  page: "configureDevicePage")
             paragraph "Help:"
@@ -105,7 +105,7 @@ def configureDevicePage(params) {
 	clearDeviceConfigSettings()
     if (params==null) {
         dynamicPage(name: "configureDevicePage", title: ""){
-		    section("<h1>Configure a device</h1>"){
+		    section("<h1>Configure a computer device</h1>"){
 		    	input "configureDeviceName", "text", title: "Device Name", required: true, multiple: false, submitOnChange: false
                 input "configureIP", "text", title: "IP Address (Static)",description:"Static Ip address of the computer", required: true, multiple: false, submitOnChange: false
                 input "configurePort", "text",title: "Port",description:"Default: 345", required: true, multiple: false, submitOnChange: false, defaultValue:345
