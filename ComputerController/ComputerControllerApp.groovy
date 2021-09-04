@@ -105,7 +105,7 @@ def configureDevicePage(params) {
 	clearDeviceConfigSettings()
     if (params==null) {
         dynamicPage(name: "configureDevicePage", title: ""){
-		    section("<h1>Configure a computer device</h1>"){
+		    section("<h1>Add A New Computer</h1>"){
 		    	input "configureDeviceName", "text", title: "Device Name", required: true, multiple: false, submitOnChange: false
                 input "configureIP", "text", title: "IP Address (Static)",description:"Static Ip address of the computer", required: true, multiple: false, submitOnChange: false
                 input "configurePort", "text",title: "Port",description:"Default: 345", required: true, multiple: false, submitOnChange: false, defaultValue:345
@@ -118,7 +118,7 @@ def configureDevicePage(params) {
          state.editedId = params.deviceNetworkId;
         def device = getChildDevice( state.editedId)
          dynamicPage(name: "configureDevicePage", title: ""){
-		    section("<h1>Configure a device</h1>"){
+		    section("<h1>Configure Computer</h1>"){
                 input "configureDeviceName", "text", title: "Device Name", required: true, multiple: false, submitOnChange: false, defaultValue: device.label
                 input "configureIP", "text", title: "IP Address (Static)",description:"Static Ip address of the computer", required: true, multiple: false, submitOnChange: false, defaultValue: device.getDataValue("IP")
                 input "configurePort", "number",title: "Port",description:"Default: 345", required: false, multiple: false, submitOnChange: false, defaultValue: device.getDataValue("Port").toInteger() 
