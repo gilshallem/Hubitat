@@ -6,7 +6,7 @@
  * 
  * 
  */
-public static String version()      {  return "v1.01"  }
+public static String version()      {  return "v1.02"  }
 definition(
     name: "Computer Controller (By Ramdev)",
     namespace: "ramdev",
@@ -25,6 +25,7 @@ preferences
 {
     page(name: "MainPage")
     page(name: "configureDevicePage")
+    page(name: "pageRemove")
 
 }
 
@@ -67,26 +68,30 @@ def MainPage() {
 	}
 	
     if (state.configuringDevice) configureDevice();
-	return dynamicPage(name: "MainPage", title: "Computer Controller ${version()} (by Ramdev)", install:true, uninstall: true){
+	return dynamicPage(name: "MainPage", install:true, uninstall: false){
         if (state.configuringDevice ) { configureDevice() }
         
-        section("<h2>Computers</h2>"){
+        section("<h2>Computer Controller ${version()} (by Ramdev)</h2>"){
 			def devCount = 0
+            paragraph "Computers:"
 			getChildDevices().sort({ a, b -> a.label <=> b.label }).each{
 				
 					devCount = devCount + 1
                    
-                href (name: "configureDevicePage", title: "${it.label}",
+                href (name: "configureDevicePage", title: "💻 ${it.label}",
 					  description: "Click to configure",
                        params: [deviceNetworkId: it.deviceNetworkId, deviceName: it.label],
 					   page: "configureDevicePage")
 				
 			}
-            href (name: "configureDevicePage", title: "<font size='5'>➕</font>  Add Device",
-                  description: "Click to add a new PC",
+            href (name: "configureDevicePage", title: "➕  Add Computer",
+                  description: "Click to add a new Computer",
 					  page: "configureDevicePage")
-			
+            paragraph "Uninstall:"
+			href "pageRemove", title: "⛔ Uninstall The App", description: "Click to uninstall Computer Controller"
 		}
+        
+       
 		
 	}
 }
@@ -125,6 +130,15 @@ def configureDevicePage(params) {
         
     }
 	
+}
+
+def pageRemove(){
+	dynamicPage(name: "pageRemove", title: "", install: false, uninstall: true){
+		section('CAUTION'){
+			paragraph "You are about to completely remove Computer Controller and all of the computers.", required: true
+			paragraph "If you are sure you want to do this, please tap on the Remove button below, To cancel press Done.", required: true
+		}
+	}
 }
 def appButtonHandler(BTN) {
 	if (BTN == "removeDeviceBTN") {

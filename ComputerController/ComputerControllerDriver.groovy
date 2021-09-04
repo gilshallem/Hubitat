@@ -8,11 +8,17 @@
  */
 
 import hubitat.helper.InterfaceUtils
+import groovy.transform.Field
 
+
+@Field static Map connected =[:]
+@Field static Map sentEventTime=[:]
+@Field static Map eventAfterConnect=[:]
 
 metadata {
     definition (name: "Computer Controller", namespace: "ramdev", author: "Ramdev") {
         capability "PushableButton"
+        capability "Initialize"
         command "SendEvent" ,[[name:"Event Data*", type: "STRING", description: "Enter event data", required: true ]] 
         command "WakeupAndSendEvent" ,[[name:"Event Data*", type: "STRING", description: "Enter event data", required: true ]] 
         command "WakeOnLan"
@@ -41,7 +47,7 @@ metadata {
         input(name:"mySecureOn", type: "text", required: false, title: "[Wake On Lan] SecureOn",description:"Certain NICs support a security feature called \"SecureOn\". It allows users to store within the NIC a hexadecimal password of 6 bytes. Example: \"EF4F34A2C43F\"")
         input(name:"myWOLPort", type: "number", required: false, title: "[Wake On Lan] Port",description:"Default: 7",defaultValue :"7")
         
-        input(name:"myWakeupTime", type: "number", required: false, title: "[Wake On Lan] Max wakeup time (secs)",description:"The maximum time in seconds it takes for the computer to wakeup (after that any event that was triggered while the pc was off will be forgotten)",defaultValue :200)
+        input(name:"myWakeupTime", type: "number", required: false, title: "[Wake On Lan] Max wakeup time (secs)",description:"The maximum time in seconds it takes for the computer to wakeup (after that any event that was triggered while the pc was off will be forgotten)",defaultValue :90)
         input(name:"myReconnectDelay", type: "number", required: false, title: "Reconnect Delay (secs)",description:"The interval between each reconnect attempt in seconds",defaultValue :1)
         
     }
@@ -49,21 +55,36 @@ metadata {
 }
 
 def initialize() {
-  
-    connect()
-    
+    state.remove("sentEventTime")
+    state.remove("connected")
+    state.remove("eventAfterConnect")
+    connected[device.id] = false
+    Connect()
 }
+
 
 def updated() {
     device.updateDataValue("IP",myIP ? "$myIP":"")
     device.updateDataValue("Port",myPort ? "$myPort":"345")
     device.updateDataValue("Username",myUsername ? "$myUsername":"")
     device.updateDataValue("Password",myPassword ? "$myPassword":"")
-    Connect()
+    if (!connected[device.id]) {
+        Connect()
+    } 
+    else {
+        //reconnect
+        interfaces.webSocket.close()
+    }
+    
     
 }
+
+def installed() {
+    Connect()
+}
 def Connect() {
-    if (!state.connected) {
+    
+    if (!connected[device.id]) {
         def uri = "http://$myIP:$myPort"
         if (myUsername?.trim() && myPassword?.trim()) {
             interfaces.webSocket.connect(uri,pingInterval: 20,headers:["Authorization": "Basic " +(myUsername + ":" + myPassword).bytes.encodeBase64()])
@@ -82,6 +103,7 @@ def AddStringParam(value) {
 }
 def ClearParams() {
     state.remove("sendParams")
+    
 }
 def addParam(value) {
     def params =  state["sendParams"]
@@ -150,9 +172,9 @@ def SendEvent(eventName) {
     ClearParams() 
 }
 def WakeupAndSendEvent(event) {
-    if (!state.connected) {
-        state.eventAfterConnect = event
-        state.sentEventTime = now()
+    if (!connected[device.id]) {
+        eventAfterConnect[device.id] = event
+        sentEventTime[device.id] = now()
         WakeOnLan()    
     }
     else {
@@ -182,7 +204,7 @@ def webSocketStatus(String status){
     if (logEnable) log.debug "webSocketStatus- ${status}"
 
     if(status.startsWith('failure: ')) {
-        state.connected = false
+        connected[device.id] = false
         sendEvent(name: "Connected", value: false)
         log.warn("failure message from web socket ${status}")
  
@@ -191,20 +213,20 @@ def webSocketStatus(String status){
     else if(status == 'status: open') {
         log.info "websocket is open"
         sendEvent(name: "Connected", value: true)
-        state.connected = true
+        connected[device.id] = true
         onConnected()
       
     } 
     else if (status == "status: closing"){
         sendEvent(name: "Connected", value: false)
-        state.connected = false
+        connected[device.id] = false
         log.warn "WebSocket connection closing."
          reconnect()
        
     } 
     else {
         sendEvent(name: "Connected", value: false)
-        state.connected = false
+        connected[device.id] = false
         log.warn "WebSocket error, reconnecting."
         reconnect()
     
@@ -212,21 +234,20 @@ def webSocketStatus(String status){
 }
 
 def onConnected() {
-    if (state.eventAfterConnect) {
-        if (now() - state.sentEventTime < (myWakeupTime?:90) *1000) {
-            SendEvent(state.eventAfterConnect)
-            state.eventAfterConnect=null
+    if (eventAfterConnect[device.id]) {
+        if (now() - sentEventTime[device.id] < (myWakeupTime?:90) *1000) {
+            SendEvent(eventAfterConnect[device.id])
+            eventAfterConnect[device.id]=null
         }
     }
 }
 def reconnect() {
     runIn(myReconnectDelay?:1,"Connect")
 }
-def configure(){
-    sendEvent(name: "numberOfButtons", value: 1)
-}
+
 
 def push() {}
+
 
 
 
