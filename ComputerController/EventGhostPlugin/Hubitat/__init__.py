@@ -4342,7 +4342,7 @@ class Hubitat(eg.PluginBase):
                         pos=wx.DefaultPosition
                     )
                     if dlg.ShowModal() == wx.ID_YES:
-                        openurl("https://github.com/gilshallem/Hubitat/releases/tag/EG_Hubitat_Plugin", new = 0)
+                        openurl("https://github.com/gilshallem/Hubitat/releases", new = 0)
                     
                     if dlg.noShow:
                         self.SetPersistentValue('dontShowVersionDialog',json[1])
