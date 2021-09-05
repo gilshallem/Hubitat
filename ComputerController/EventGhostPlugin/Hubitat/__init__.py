@@ -4330,7 +4330,7 @@ class Hubitat(eg.PluginBase):
             if version_num<json[0]:
                 eg.PrintError("Hubitat Plugin is outdated. Your version: "+version +", Latest: " + json[1]);
                 eg.PrintError("Download the latest version from:");
-                eg.PrintError("https://github.com/gilshallem/Hubitat/releases/tag/EG_Hubitat_Plugin");
+                eg.PrintError("https://github.com/gilshallem/Hubitat/releases");
                 
                 dontShowVersionDialog = self.GetPersistentValue('dontShowVersionDialog')
                 if dontShowVersionDialog==None or dontShowVersionDialog!=json[1]:
