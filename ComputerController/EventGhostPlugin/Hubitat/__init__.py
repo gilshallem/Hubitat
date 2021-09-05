@@ -1,5 +1,5 @@
-version = "1.0.2"
-version_num = 2
+version = "1.0.3"
+version_num = 3
 
 import eg
 from JumpIfElse2 import JumpIfElse2
@@ -30,6 +30,8 @@ Plugin version: %s
 )
 import wx
 import socket
+import requests
+from webbrowser import open as openurl
 from os import curdir, pardir
 from sys import path
 from ssl import wrap_socket, CERT_NONE
@@ -51,6 +53,7 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 from SocketServer import ThreadingMixIn
 from os.path import getmtime, isfile, isdir, join, exists, splitdrive, split
 from wx.lib.mixins.listctrl import TextEditMixin
+
 try:
     from websocket import WebSocketApp
 except ImportError:
@@ -4310,10 +4313,46 @@ class Hubitat(eg.PluginBase):
     def __init__(self):
         self.AddEvents()
         self.AddAction(WsBroadcastMessage,"Send Command","Send Command",'Broadcasts a command to all the connceted hubs')
-        self.AddAction(JumpIfElse2)
+        group1 = self.AddGroup(
+            "Extras",
+            "Not directrly related to hubitat"
+        )
+        group1.AddAction(JumpIfElse2)
+        
         #self.AddActionsFromList(ACTIONS)
 
+    def checkVersion(self): 
+        r =requests.get('https://raw.githubusercontent.com/gilshallem/Hubitat/main/ComputerController/EventGhostPlugin/version.json')
+        if r.status_code==200:
+            json = loads(r.text)
+            self.latestVersion = json[1]
+            self.latestVersionNum = json[0]
+            if version_num<json[0]:
+                eg.PrintError("Hubitat Plugin is outdated. Your version: "+version +", Latest: " + json[1]);
+                eg.PrintError("Download the latest version from:");
+                eg.PrintError("https://github.com/gilshallem/Hubitat/releases/tag/EG_Hubitat_Plugin");
+                
+                dontShowVersionDialog = self.GetPersistentValue('dontShowVersionDialog')
+                if dontShowVersionDialog==None or dontShowVersionDialog!=json[1]:
+                    dlg = MessageDialog2(
+                        parent=eg.document.frame,
+                        message='Hubitat Plugin is outdated.\nYour version: '+version +', Latest: ' + json[1] +'\nWould you like to download the new version now?',
+                        caption='Hubitat Plugin Outdated',
+                        style=wx.YES_NO |  wx.ICON_QUESTION,
+                        pos=wx.DefaultPosition
+                    )
+                    if dlg.ShowModal() == wx.ID_YES:
+                        openurl("https://github.com/gilshallem/Hubitat/releases/tag/EG_Hubitat_Plugin", new = 0)
+                    
+                    if dlg.noShow:
+                        self.SetPersistentValue('dontShowVersionDialog',json[1])
+                    else :
+                        self.DelPersistentValue('dontShowVersionDialog')
+                    dlg.Destroy()
 
+                
+            
+            
     def OnComputerSuspend(self, dummy):
         self.__stop__()
 
@@ -4381,6 +4420,9 @@ class Hubitat(eg.PluginBase):
             self.text.started % (port)
         )
         # eg.PrintNotice("Persistent values: " + repr(self.pubPerVars))
+        self.checkVersionThread = Thread(name="checkVersion", target = self.checkVersion)
+        self.checkVersionThread.start()
+    
         
 
     def __stop__(self):
@@ -4909,6 +4951,7 @@ class Hubitat(eg.PluginBase):
     ):
         text = self.text
         panel = eg.ConfigPanel()
+        panel.EnableButtons(True)
         portCtrl = panel.SpinIntCtrl(port, min=1, max=65535)
         # filepathCtrl = panel.DirBrowseButton(basepath)
         # certfileCtrl = eg.FileBrowseButton(
@@ -4960,7 +5003,7 @@ class Hubitat(eg.PluginBase):
         staticBoxSizer.Add(sizer, 0, wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, 5)
         panel.sizer.Add(staticBoxSizer, 0, wx.EXPAND)
         
-        helpLabel = panel.StaticText("The plugin will listen for connections from Hubitat hubs on the stated port.\nYou may choose to give a username and password in order to make sure no one\nelse sends events to your EG except your hub - it is not mandatory.\nif you do add a user and password, you need to set them also in the hub\nso it will be able to connect to EG\n\nNOTE: due to a bug in EG you may need to make some changes to this form in order to click OK")
+        helpLabel = panel.StaticText("The plugin will listen for connections from Hubitat hubs on the stated port.\nYou may choose to give a username and password in order to make sure no one\nelse sends events to your EG except your hub - it is not mandatory.\nif you do add a user and password, you need to set them also in the hub\nso it will be able to connect to EG")
         panel.sizer.Add(helpLabel, 0, wx.TOP,10)
         # sizer = wx.FlexGridSizer(3, 2, 5, 5)
         # sizer.Add(labels[3], 0, ACV)
@@ -6054,3 +6097,91 @@ ACTIONS = (
             )
     
 )
+
+
+class MessageDialog2(wx.Dialog):
+    """
+    A replacement for wx.MessageDialog, that wraps the message, if the
+    dialog would get to wide.
+    """
+    def __init__(
+        self,
+        parent,
+        message,
+        caption=eg.APP_NAME,
+        style=wx.OK | wx.CANCEL,
+        pos=wx.DefaultPosition
+    ):
+        self.noShow = false
+        if parent is None and eg.document.frame:
+            parent = eg.document.frame
+        dialogStyle = wx.DEFAULT_DIALOG_STYLE
+        if style & wx.STAY_ON_TOP:
+            dialogStyle |= wx.STAY_ON_TOP
+        wx.Dialog.__init__(self, parent, -1, caption, pos, style=dialogStyle)
+
+        if style & wx.ICON_EXCLAMATION:
+            artId = wx.ART_WARNING
+        elif style & wx.ICON_HAND:
+            artId = wx.ART_ERROR
+        elif style & wx.ICON_ERROR:
+            artId = wx.ART_ERROR
+        elif style & wx.ICON_QUESTION:
+            artId = wx.ART_QUESTION
+        elif style & wx.ICON_INFORMATION:
+            artId = wx.ART_INFORMATION
+        else:
+            artId = None
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        if artId is not None:
+            bmp = wx.ArtProvider.GetBitmap(artId, wx.ART_CMN_DIALOG, (32, 32))
+            staticBitmap = wx.StaticBitmap(self, -1, bmp)
+            sizer.Add(staticBitmap, 0, wx.ALL, 12)
+        staticText = wx.StaticText(self, -1, message)
+        staticText.Wrap(400)
+        sizer.Add(staticText, 0, wx.ALIGN_CENTER | wx.LEFT | wx.TOP | wx.RIGHT, 6)
+        noShowCtrl = wx.CheckBox(self, -1, "Do not show again")
+        noShowCtrl.Bind(wx.EVT_CHECKBOX,self.noShowChanged)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(noShowCtrl, 0, wx.ALIGN_CENTER | wx.LEFT | wx.TOP | wx.RIGHT, 6)
+        text = eg.text.General
+        if wx.YES_NO & style:
+            yesButton = wx.Button(self, wx.ID_YES, text.yes)
+            buttonSizer.Add(yesButton, 0, wx.LEFT | wx.RIGHT, 3)
+            noButton = wx.Button(self, wx.ID_NO, text.no)
+            buttonSizer.Add(noButton, 0, wx.LEFT | wx.RIGHT, 3)
+            if wx.NO_DEFAULT & style:
+                self.SetDefaultItem(noButton)
+                noButton.SetFocus()
+            else:
+                self.SetDefaultItem(yesButton)
+                yesButton.SetFocus()
+            yesButton.Bind(wx.EVT_BUTTON, self.OnYesButton)
+            noButton.Bind(wx.EVT_BUTTON, self.OnNoButton)
+        else:
+            okButton = wx.Button(self, wx.ID_OK, text.ok)
+            buttonSizer.Add(okButton, 0, wx.LEFT | wx.RIGHT, 3)
+        if wx.CANCEL & style:
+            cancelButton = wx.Button(self, wx.ID_CANCEL, text.cancel)
+            buttonSizer.Add(cancelButton, 0, wx.LEFT | wx.RIGHT, 3)
+
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        mainSizer.Add(sizer)
+       
+        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 12)
+        self.SetSizerAndFit(mainSizer)
+        if parent and pos == wx.DefaultPosition:
+            self.CenterOnParent()
+
+    def OnNoButton(self, event):
+        self.EndModal(wx.ID_NO)
+        event.Skip()
+
+    def OnYesButton(self, event):
+        self.EndModal(wx.ID_YES)
+        event.Skip()
+    
+    def noShowChanged(self, e):
+        cb = e.GetEventObject() 
+        self.noShow = cb.GetValue()
