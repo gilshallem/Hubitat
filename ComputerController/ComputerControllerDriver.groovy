@@ -52,7 +52,10 @@ metadata {
         input(name:"myWOLPort", type: "number", required: false, title: "[Wake On Lan] Port",description:"Default: 7",defaultValue :"7")
         
         input(name:"myWakeupTime", type: "number", required: false, title: "[Wake On Lan] Max wakeup time (secs)",description:"The maximum time in seconds it takes for the computer to wakeup (after that any event that was triggered while the pc was off will be forgotten)",defaultValue :90)
-        input(name:"myReconnectDelay", type: "number", required: false, title: "Reconnect Delay (secs)",description:"The interval between each reconnect attempt in seconds",defaultValue :1)
+        input(name:"myReconnectDelay", type: "number", required: false, title: "Reconnect Delay (secs)",description:"The interval between each reconnect attempt in seconds",defaultValue: 300)
+        
+        input name: "enableDebug", type: "bool", title: "Enable debug logging", defaultValue: true
+        input name: "enableDesc", type: "bool", title: "Enable descriptionText logging", defaultValue: true
         
     }
     
@@ -64,6 +67,7 @@ def initialize() {
     state.remove("eventAfterConnect")
     connected[device.id] = false
     Connect()
+    runIn(1800,logsOff)
 }
 
 
@@ -125,7 +129,7 @@ def addParam(value) {
 }
 
 def parse(String cmd) {
-    log.debug "recived: $cmd"
+    logDebug "recived: $cmd"
     def json = parseJson(cmd);
     if (json[0] == "plugin_version") {
         pluginVersion[device.id] = [json[1],json[2]]
@@ -210,7 +214,7 @@ def httpcallback() {
 def SendEvent(eventName) {
     def params = state["sendParams"];
     if (!params) params=[]
-    log.debug "sending " + eventName
+    logDebug "sending " + eventName
     interfaces.webSocket.sendMessage("{\"event\":\"" +eventName +"\",\"params\":"+ state["sendParams"] +"}" )
     ClearParams() 
 }
@@ -243,8 +247,7 @@ def WakeOnLan() {
 
 def webSocketStatus(String status){
     
-    def logEnable = true
-    if (logEnable) log.debug "webSocketStatus- ${status}"
+    logDebug "webSocketStatus- ${status}"
 
     if(status.startsWith('failure: ')) {
         connected[device.id] = false
@@ -289,9 +292,21 @@ def reconnect() {
     runIn(myReconnectDelay?:1,"Connect")
 }
 
-
 def push() {}
 
+def logDebug(msg) {
+    if (settings?.enableDebug) {
+		log.debug msg
+	}
+}
 
+def logText(msg) {
+    if (settings?.enableDesc) {
+        log.info msg
+    }
+}
 
-
+def logsOff() {
+    log.warn "debug logging disabled..."
+    app.updateSetting("debugOutput",[value:"false",type:"bool"])
+}

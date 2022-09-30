@@ -194,7 +194,3 @@ def configureDevice() {
 	clearDeviceConfigSettings()
 	return MainPage()
 }
-
-
-
-
